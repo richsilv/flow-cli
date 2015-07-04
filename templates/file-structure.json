@@ -1,0 +1,41 @@
+{
+    "-path": ".",
+    "lib": {
+      "lib": {
+        "app.js": {
+          "-content": "// Global app settings"
+        }
+      },
+      "routes.js": {
+        "-template": "routes.ejs"
+      },
+      "collections": {
+        "-type": "d"
+      }
+    },
+    "client": {
+      "collections": {
+        "-type": "d"
+      },
+      "methods": {
+        "-type": "d"
+      }
+    },
+    "server": {
+      "collections": {
+        "-type": "d"
+      },
+      "methods": {
+        "-type": "d"
+      },
+      "publications": {
+        "-type": "d"
+      }     
+    },
+    "public": {
+      "-type": "d"
+    },
+    "private": {
+      "-type": "d"
+    }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "flow-cli",
+  "version": "0.0.1",
+  "description": "Simple CLI for Meteor Flow-Router",
+  "keywords": ["meteor", "cli", "flow-router"],
+  "bugs": { 
+    "url" : "https://github.com/richsilv/flow-cli/issues",
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": "./flow-cli.js",
+  "author": {
+    "name": "Richard Silverton",
+    "email": "richard@richsi.lv"
+  },
+  "repository" : { 
+    "type" : "git",
+    "url" : "https://github.com/richsilv/flow-cli.git"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "cli-color": "^1.0.0",
+    "commander": "^2.8.1",
+    "ejs": "^2.3.2",
+    "fibers": "^1.0.6",
+    "flat-file-db": "^0.1.5",
+    "jsondir": "^0.1.3",
+    "lodash.forin": "^3.0.2",
+    "lodash.isempty": "^3.0.4",
+  }
+}

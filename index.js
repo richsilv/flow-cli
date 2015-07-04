@@ -1,0 +1,1 @@
+console.log('Run the command line interface with "flow-cli"');
