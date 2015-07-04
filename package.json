@@ -1,6 +1,6 @@
 {
   "name": "flow-router-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simple CLI for Meteor Flow-Router",
   "keywords": ["meteor", "cli", "flow-router"],
   "bugs": { 
@@ -10,7 +10,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bin": "./flow-cli.js",
+  "bin": { 
+    "flow-cli": "./flow-cli.js"
+  },
   "author": {
     "name": "Richard Silverton",
     "email": "richard@richsi.lv"
