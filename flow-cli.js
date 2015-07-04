@@ -9,7 +9,6 @@ var Future = require('fibers/future'),
       isEmpty: require('lodash.isempty')
     },
     fs = Future.wrap(require('fs')),
-    handlebars = require('node-handlebars'),
     ejs = require('ejs'),
     jsondir = Future.wrap(require('jsondir'));
 
@@ -19,37 +18,15 @@ var error = clc.red.bold,
     warning = clc.yellow,
     success = clc.green;
 
-var db = flatfile.sync('./.flow-cli/flow-cli.json'),
+var db,
     dbSeedData = {
       'init': true,
       'routes': {}
     },
     dirStructure = getDirStructure();
-    
-process.on('exit', function() {
-  db.close();
-});
-    
-db.init = function() {
-  if (!db.has('init') || !db.get('init')) {
-    _.forEach(dbSeedData, function(val, key) {
-      db.put(key, val);
-    });
-    jsondir.json2dirFuture(dirStructure);
-  }
-};
-db.set = function(item, key, val) {
-  var current = db.get(item);
-  if (current) {
-    current[key] = val;
-    db.put(item, current);
-  } else {
-    db.put(item, {key: val});
-  }
-};
 
-var hbs = Future.wrap(handlebars.create({}));
-
+// *********************************************
+    
 program
   .version('0.0.1');
 
@@ -64,6 +41,7 @@ program
   .action(function() {    
     checkMeteorDir();
     console.log(info('Initialising Flow-CLI project...'));
+    setupDB();
     db.init();
     console.log(success('DONE'));
   });
@@ -119,11 +97,10 @@ program.on('--help', function(){
 Future.task(function() {
   program.parse(process.argv);
   
-  if (!process.argv.slice(2).length) {
-    program.outputHelp();
-    return;
-  }
+  if (!process.argv.slice(2).length) program.help();
 }).detach();
+
+// *****************************************
 
 function checkMeteorDir() {
   try {
@@ -135,10 +112,32 @@ function checkMeteorDir() {
 }
 
 function checkFlowCliInit() {
+  setupDB();
   if (!db.has('init')) {
     console.log(warning('Initialise a Flow-CLI project with ' + strong('flow-cli init')));
     process.exit(1);
   }
+}
+
+function setupDB() {
+  db = flatfile.sync('./.flow-cli/flow-cli.json');
+  db.init = function() {
+    if (!db.has('init') || !db.get('init')) {
+      _.forEach(dbSeedData, function(val, key) {
+        db.put(key, val);
+      });
+      jsondir.json2dirFuture(dirStructure);
+    }
+  };
+  db.set = function(item, key, val) {
+    var current = db.get(item);
+    if (current) {
+      current[key] = val;
+      db.put(item, current);
+    } else {
+      db.put(item, {key: val});
+    }
+  };
 }
 
 function getDirStructure() {
