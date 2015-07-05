@@ -10,10 +10,14 @@ var Future = require('fibers/future'),
     },
     fs = Future.wrap(require('fs')),
     ejs = require('ejs'),
-    jsondir = Future.wrap(require('jsondir'));
+    jsondir = Future.wrap(require('jsondir')),
+    commands = {
+      info: require('./info.js'),
+      add: require('./add.js')
+    };
 
 var error = clc.red.bold,
-    info = clc.blue,
+    inform = clc.blue,
     strong = clc.bold,
     warning = clc.yellow,
     success = clc.green;
@@ -28,7 +32,7 @@ var db,
 // *********************************************
     
 program
-  .version('0.0.1');
+  .version('0.0.3');
 
 program
   .action(function(env, options) {    
@@ -40,7 +44,7 @@ program
   .description('initialise project for flow-router scaffolding')
   .action(function() {    
     checkMeteorDir();
-    console.log(info('Initialising Flow-CLI project...'));
+    console.log(inform('Initialising Flow-CLI project...'));
     setupDB();
     db.init();
     console.log(success('DONE'));
@@ -52,7 +56,7 @@ program
   .action(function() {    
     checkMeteorDir();
     checkFlowCliInit();
-    console.log(info('Current Routes are: ' + Object.getOwnPropertyNames(db.get('routes'))));
+    commands.info(db);
   });
   
 program
@@ -61,28 +65,7 @@ program
   .action(function(type, names) {
     checkMeteorDir();
     checkFlowCliInit();
-    
-    switch (type) {
-      case 'route':
-        var routes = db.get('routes');
-        names.forEach(function(name) {
-          if (!routes[name]) {
-            console.log(info('Adding route ' + strong(name) + '...'));
-            var routeScaffolding = ejs.render(fs.readFileSync(__dirname + '/templates/route.ejs', 'utf8'), {name: name});
-            db.set('routes', name, {});
-            fs.appendFileSync(process.cwd() + '/lib/routes.js', routeScaffolding);
-            console.log(success('DONE'));
-          } else {
-            console.log(warning('Route already exists (' + strong(name) + '), taking no action'));
-          }
-        });
-        break;
-      default:
-        console.log(error('Unrecognised option: ' + type));
-        process.exit(1);
-        break;
-    }
-    
+    commands.add(db, type, names);    
   });
   
 program.on('--help', function(){
