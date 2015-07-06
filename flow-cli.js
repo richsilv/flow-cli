@@ -6,14 +6,15 @@ var Future = require('fibers/future'),
     flatfile = require('flat-file-db'),
     _ = {
       forEach: require('lodash.forin'),
-      isEmpty: require('lodash.isempty')
+      isEmpty: require('lodash.isempty'),
+      pick: require('lodash.pick')
     },
     fs = Future.wrap(require('fs')),
     ejs = require('ejs'),
     jsondir = Future.wrap(require('jsondir')),
     commands = {
       info: require('./info.js'),
-      add: require('./add.js')
+      add: require('./add.js'),
     };
 
 var error = clc.red.bold,
@@ -62,10 +63,13 @@ program
 program
   .command('add <type> [names...]')
   .description('adds one or more entities of type to project')
-  .action(function(type, names) {
+  .option('-s, --server', 'add only to server code')
+  .option('-c, --client', 'add only to client code')
+  .option('-b, --both', 'add to both client and server (default)')
+  .action(function(type, names, options) {
     checkMeteorDir();
     checkFlowCliInit();
-    commands.add(db, type, names);    
+    commands.add(db, type, names, _.pick(options, ['client', 'server']));    
   });
   
 program.on('--help', function(){
