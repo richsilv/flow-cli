@@ -15,6 +15,7 @@ var Future = require('fibers/future'),
       init: require('./commands/init.js'),
       info: require('./commands/info.js'),
       add: require('./commands/add.js'),
+      remove: require('./commands/remove.js')
     };
 
 var error = clc.red.bold,
@@ -37,7 +38,7 @@ program
 
 program
   .command('init')
-  .description('initialise project for flow-router scaffolding')
+  .description('initialise project for Flow-CLI')
   .action(function() {
     checkMeteorDir();
     console.log(inform('Initialising Flow-CLI project...'));
@@ -48,7 +49,7 @@ program
 
 program
   .command('info')
-  .description('list entities currently associated with project')
+  .description('list entities associated with project')
   .action(function() {
     checkMeteorDir();
     checkFlowCliInit();
@@ -56,8 +57,17 @@ program
   });
 
 program
+  .command('remove <type> [names...]')
+  .description('remove entities from Flow-CLI register')
+  .action(function(type, names, options) {
+    checkMeteorDir();
+    checkFlowCliInit();
+    commands.remove(db, type, names);
+  });
+
+program
   .command('add <type> [names...]')
-  .description('adds one or more entities of type to project')
+  .description('add entities to the project')
   .option('-s, --server', 'add only to server code')
   .option('-c, --client', 'add only to client code')
   .option('-b, --both', 'add to both client and server (default)')
@@ -68,10 +78,12 @@ program
   });
 
 program.on('--help', function(){
+  console.log('  Available entity types:', inform('routes'), inform('methods'), inform('collections'));
+  console.log('');
   console.log('  Example:');
   console.log('');
   console.log('    $ flow-cli init');
-  console.log('    $ flow-cli add route myRoute1 myRoute2 ...');
+  console.log('    $ flow-cli add routes myRoute1 myRoute2 ...');
   console.log('    $ flow-cli info');
   console.log('');
 });

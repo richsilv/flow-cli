@@ -37,6 +37,7 @@
     "jsondir": "^0.1.3",
     "lodash.forin": "^3.0.2",
     "lodash.isempty": "^3.0.4",
-    "lodash.pick": "^3.1.0"
+    "lodash.pick": "^3.1.0",
+    "replace-in-file": "^0.2.1"
   }
 }
