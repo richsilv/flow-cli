@@ -6,97 +6,91 @@ var Future = require('fibers/future'),
     flatfile = require('flat-file-db'),
     _ = {
       forEach: require('lodash.forin'),
-      isEmpty: require('lodash.isempty')
+      isEmpty: require('lodash.isempty'),
+      pick: require('lodash.pick')
     },
     fs = Future.wrap(require('fs')),
     ejs = require('ejs'),
-    jsondir = Future.wrap(require('jsondir'));
+    commands = {
+      init: require('./commands/init.js'),
+      info: require('./commands/info.js'),
+      add: require('./commands/add.js'),
+      remove: require('./commands/remove.js')
+    };
 
 var error = clc.red.bold,
-    info = clc.blue,
+    inform = clc.blue,
     strong = clc.bold,
     warning = clc.yellow,
     success = clc.green;
 
-var db,
-    dbSeedData = {
-      'init': true,
-      'routes': {}
-    },
-    dirStructure = getDirStructure();
+var db;
 
 // *********************************************
-    
-program
-  .version('0.0.1');
 
 program
-  .action(function(env, options) {    
+  .version('0.0.3');
+
+program
+  .action(function(env, options) {
     program.help();
   });
 
 program
   .command('init')
-  .description('initialise project for flow-router scaffolding')
-  .action(function() {    
+  .description('initialise project for Flow-CLI')
+  .action(function() {
     checkMeteorDir();
-    console.log(info('Initialising Flow-CLI project...'));
+    console.log(inform('Initialising Flow-CLI project...'));
     setupDB();
-    db.init();
+    commands.init(db);
     console.log(success('DONE'));
   });
 
 program
   .command('info')
-  .description('list entities currently associated with project')
-  .action(function() {    
+  .description('list entities associated with project')
+  .action(function() {
     checkMeteorDir();
     checkFlowCliInit();
-    console.log(info('Current Routes are: ' + Object.getOwnPropertyNames(db.get('routes'))));
+    commands.info(db);
   });
-  
+
+program
+  .command('remove <type> [names...]')
+  .description('remove entities from Flow-CLI register')
+  .action(function(type, names, options) {
+    checkMeteorDir();
+    checkFlowCliInit();
+    commands.remove(db, type, names);
+  });
+
 program
   .command('add <type> [names...]')
-  .description('adds one or more entities of type to project')
-  .action(function(type, names) {
+  .description('add entities to the project')
+  .option('-s, --server', 'add only to server code')
+  .option('-c, --client', 'add only to client code')
+  .option('-b, --both', 'add to both client and server (default)')
+  .action(function(type, names, options) {
     checkMeteorDir();
     checkFlowCliInit();
-    
-    switch (type) {
-      case 'route':
-        var routes = db.get('routes');
-        names.forEach(function(name) {
-          if (!routes[name]) {
-            console.log(info('Adding route ' + strong(name) + '...'));
-            var routeScaffolding = ejs.render(fs.readFileSync(__dirname + '/templates/route.ejs', 'utf8'), {name: name});
-            db.set('routes', name, {});
-            fs.appendFileSync(process.cwd() + '/lib/routes.js', routeScaffolding);
-            console.log(success('DONE'));
-          } else {
-            console.log(warning('Route already exists (' + strong(name) + '), taking no action'));
-          }
-        });
-        break;
-      default:
-        console.log(error('Unrecognised option: ' + type));
-        process.exit(1);
-        break;
-    }
-    
+    commands.add(db, type, names, _.pick(options, ['client', 'server']));
   });
-  
+
 program.on('--help', function(){
+  console.log('  Available entity types:', inform('routes'), inform('methods'), inform('collections'));
+  console.log('');
   console.log('  Example:');
   console.log('');
   console.log('    $ flow-cli init');
-  console.log('    $ flow-cli add route myRoute1 myRoute2 ...');
-  console.log('    $ flow-cli info');  
+  console.log('    $ flow-cli add routes myRoute1 myRoute2 ...');
+  console.log('    $ flow-cli info');
   console.log('');
 });
-  
+
 Future.task(function() {
   program.parse(process.argv);
-  
+
   if (!process.argv.slice(2).length) program.help();
 }).detach();
 
@@ -108,7 +102,7 @@ function checkMeteorDir() {
   } catch(e) {
     console.log(error('Not in a Meteor project root directory.'));
     process.exit(1);
-  }    
+  }
 }
 
 function checkFlowCliInit() {
@@ -121,14 +115,6 @@ function checkFlowCliInit() {
 
 function setupDB() {
   db = flatfile.sync('./.flow-cli/flow-cli.json');
-  db.init = function() {
-    if (!db.has('init') || !db.get('init')) {
-      _.forEach(dbSeedData, function(val, key) {
-        db.put(key, val);
-      });
-      jsondir.json2dirFuture(dirStructure);
-    }
-  };
   db.set = function(item, key, val) {
     var current = db.get(item);
     if (current) {

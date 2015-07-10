@@ -9,24 +9,28 @@
       "routes.js": {
         "-template": "routes.ejs"
       },
-      "collections": {
+      "collections-global": {
         "-type": "d"
       }
     },
     "client": {
-      "collections": {
+      "collections-client": {
         "-type": "d"
       },
-      "methods": {
-        "-type": "d"
+      "method-stubs": {
+        "method-stubs.js": {
+          "-template": "method-stubs.ejs" 
+        }
       }
     },
     "server": {
-      "collections": {
+      "collections-server": {
         "-type": "d"
       },
       "methods": {
-        "-type": "d"
+        "methods.js": {
+          "-template": "methods.ejs" 
+        }
       },
       "publications": {
         "-type": "d"
