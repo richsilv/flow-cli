@@ -11,10 +11,10 @@ var Future = require('fibers/future'),
     },
     fs = Future.wrap(require('fs')),
     ejs = require('ejs'),
-    jsondir = Future.wrap(require('jsondir')),
     commands = {
-      info: require('./info.js'),
-      add: require('./add.js'),
+      init: require('./commands/init.js'),
+      info: require('./commands/info.js'),
+      add: require('./commands/add.js'),
     };
 
 var error = clc.red.bold,
@@ -23,43 +23,38 @@ var error = clc.red.bold,
     warning = clc.yellow,
     success = clc.green;
 
-var db,
-    dbSeedData = {
-      'init': true,
-      'routes': {}
-    },
-    dirStructure = getDirStructure();
+var db;
 
 // *********************************************
-    
+
 program
   .version('0.0.3');
 
 program
-  .action(function(env, options) {    
+  .action(function(env, options) {
     program.help();
   });
 
 program
   .command('init')
   .description('initialise project for flow-router scaffolding')
-  .action(function() {    
+  .action(function() {
     checkMeteorDir();
     console.log(inform('Initialising Flow-CLI project...'));
     setupDB();
-    db.init();
+    commands.init(db);
     console.log(success('DONE'));
   });
 
 program
   .command('info')
   .description('list entities currently associated with project')
-  .action(function() {    
+  .action(function() {
     checkMeteorDir();
     checkFlowCliInit();
     commands.info(db);
   });
-  
+
 program
   .command('add <type> [names...]')
   .description('adds one or more entities of type to project')
@@ -69,21 +64,21 @@ program
   .action(function(type, names, options) {
     checkMeteorDir();
     checkFlowCliInit();
-    commands.add(db, type, names, _.pick(options, ['client', 'server']));    
+    commands.add(db, type, names, _.pick(options, ['client', 'server']));
   });
-  
+
 program.on('--help', function(){
   console.log('  Example:');
   console.log('');
   console.log('    $ flow-cli init');
   console.log('    $ flow-cli add route myRoute1 myRoute2 ...');
-  console.log('    $ flow-cli info');  
+  console.log('    $ flow-cli info');
   console.log('');
 });
-  
+
 Future.task(function() {
   program.parse(process.argv);
-  
+
   if (!process.argv.slice(2).length) program.help();
 }).detach();
 
@@ -95,7 +90,7 @@ function checkMeteorDir() {
   } catch(e) {
     console.log(error('Not in a Meteor project root directory.'));
     process.exit(1);
-  }    
+  }
 }
 
 function checkFlowCliInit() {
@@ -108,14 +103,6 @@ function checkFlowCliInit() {
 
 function setupDB() {
   db = flatfile.sync('./.flow-cli/flow-cli.json');
-  db.init = function() {
-    if (!db.has('init') || !db.get('init')) {
-      _.forEach(dbSeedData, function(val, key) {
-        db.put(key, val);
-      });
-      jsondir.json2dirFuture(dirStructure);
-    }
-  };
   db.set = function(item, key, val) {
     var current = db.get(item);
     if (current) {
