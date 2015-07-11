@@ -1,6 +1,6 @@
 {
   "name": "flow-router-cli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Simple CLI for Meteor Flow-Router",
   "keywords": [
     "meteor",

@@ -1,12 +1,29 @@
-FlowRouter.route('/<%= name %>', {
-  name: '<%= name %>',
-  triggersEnter: [],
-  subscriptions: function(params, queryParams) {
+<%= pascalName %> = new Mongo.Collection('<%= snakeName %>');
 
+<%= pascalName %>.allow({
+  insert: function (userId, doc) {
+    return true;
   },
-  action: function(params, queryParams) {
-  
+
+  update: function (userId, doc, fieldNames, modifier) {
+    return true;
   },
-  triggersExit: []
+
+  remove: function (userId, doc) {
+    return true;
+  }
 });
 
+<%= pascalName %>.deny({
+  insert: function (userId, doc) {
+    return false;
+  },
+
+  update: function (userId, doc, fieldNames, modifier) {
+    return false;
+  },
+
+  remove: function (userId, doc) {
+    return false;
+  }
+});

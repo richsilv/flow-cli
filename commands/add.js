@@ -46,7 +46,7 @@ var add = function(db, type, names, options) {
           replace({
             files: [
               process.cwd() + '/client/method-stubs/method-stubs.js',
-              process.cwd() + '/server/methods/methods.js'              
+              process.cwd() + '/server/methods/methods.js'
             ],
             replace: /\/\/ methods here/g,
             with: methodScaffolding
@@ -62,10 +62,12 @@ var add = function(db, type, names, options) {
       var collections = db.get('collections');
       var target = parseTarget(options);
       names.forEach(function(name) {
+        var pascalName = Case.pascal(name),
+            snakeName = Case.snake(name);
         name = Case.camel(name);
         if (!collections[name]) {
           console.log(inform('Adding collection ' + strong(name) + ' to ' + target.name + '...'));
-          var collectionScaffolding = ejs.render(fs.readFileSync(path.resolve(__dirname, '../templates/collection.ejs'), 'utf8'), {name: Case.pascal(name)});
+          var collectionScaffolding = ejs.render(fs.readFileSync(path.resolve(__dirname, '../templates/collection.ejs'), 'utf8'), {pascalName: pascalName, snakeName: snakeName});
           db.set('collections', name, {where: target.name});
           fs.writeFileSync(process.cwd() + target.path + '/' + target.collections + '/' + name + '.js', collectionScaffolding);
           console.log(success('DONE'));
